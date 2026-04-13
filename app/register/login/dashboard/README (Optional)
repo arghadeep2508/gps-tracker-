@@ -1,0 +1,7 @@
+# GPS Tracker App
+
+- Supabase Auth + DB
+- SOS button with GPS
+- Sends SMS via device
+
+Deploy on Vercel
