@@ -1,12 +1,14 @@
+import "./globals.css"
+
 export const metadata = {
-  title: "GPS Tracker",
+  title: "SafeSphere",
   description: "Emergency Safety App"
 }
 
 export default function RootLayout({ children }) {
   return (
-    <html>
-      <body style={{ fontFamily: 'Arial', padding: 20 }}>
+    <html lang="en">
+      <body className="min-h-screen flex items-center justify-center">
         {children}
       </body>
     </html>
