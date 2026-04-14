@@ -21,21 +21,28 @@ export default function Login() {
   }
 
   return (
-    <div>
-      <h2>Login</h2>
+    <div className="bg-slate-900 p-6 rounded-2xl w-[350px] shadow-lg">
+      <h2 className="text-xl font-bold mb-4 text-center">Login</h2>
 
       <input
         placeholder="Email"
         onChange={(e) => setEmail(e.target.value)}
+        className="w-full p-2 mb-3 rounded bg-gray-800 border border-gray-700"
       />
 
       <input
         type="password"
         placeholder="Password"
         onChange={(e) => setPassword(e.target.value)}
+        className="w-full p-2 mb-3 rounded bg-gray-800 border border-gray-700"
       />
 
-      <button onClick={handleLogin}>Login</button>
+      <button
+        onClick={handleLogin}
+        className="w-full bg-blue-500 p-2 rounded hover:bg-blue-600"
+      >
+        Login
+      </button>
     </div>
   )
 }
