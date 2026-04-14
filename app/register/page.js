@@ -30,13 +30,13 @@ export default function Register() {
       ...form
     })
 
-    alert("Registered Successfully")
+    alert("Registered")
     router.push('/login')
   }
 
   return (
-    <div>
-      <h2>Register</h2>
+    <div className="bg-slate-900 p-6 rounded-2xl w-[350px] shadow-lg">
+      <h2 className="text-xl font-bold mb-4 text-center">Register</h2>
 
       {Object.keys(form).map((key) => (
         <input
@@ -45,10 +45,16 @@ export default function Register() {
           type={key === "password" ? "password" : "text"}
           placeholder={key}
           onChange={handleChange}
+          className="w-full p-2 mb-2 rounded bg-gray-800 border border-gray-700"
         />
       ))}
 
-      <button onClick={handleRegister}>Register</button>
+      <button
+        onClick={handleRegister}
+        className="w-full bg-blue-500 p-2 rounded mt-3 hover:bg-blue-600"
+      >
+        Register
+      </button>
     </div>
   )
 }
