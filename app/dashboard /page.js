@@ -1,56 +1,132 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 
 export default function Dashboard() {
   const [profile, setProfile] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+    const loadProfile = async () => {
+      try {
+        // 🔹 Get logged-in user
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
+        if (userError || !user) {
+          alert("User not logged in")
+          setLoading(false)
+          return
+        }
 
-      setProfile(data)
+        console.log("User:", user)
+
+        // 🔹 Fetch profile data
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+
+        if (error) {
+          console.error("Fetch error:", error)
+          alert("Error fetching profile")
+          setLoading(false)
+          return
+        }
+
+        console.log("Profile:", data)
+
+        setProfile(data)
+        setLoading(false)
+
+      } catch (err) {
+        console.error("Unexpected error:", err)
+        alert("Something went wrong")
+        setLoading(false)
+      }
     }
 
-    load()
+    loadProfile()
   }, [])
 
+  // 🚨 SOS FUNCTION
   const sendSOS = () => {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const lat = pos.coords.latitude
-      const lon = pos.coords.longitude
+    if (!profile) {
+      alert("Profile not loaded")
+      return
+    }
 
-      const msg = `EMERGENCY 🚨
+    if (!navigator.geolocation) {
+      alert("Geolocation not supported")
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude
+        const lon = pos.coords.longitude
+
+        const message = `EMERGENCY 🚨
 Name: ${profile.name}
 Phone: ${profile.phone}
 Age: ${profile.age}
 Health: ${profile.health}
 
+Location:
 https://maps.google.com/?q=${lat},${lon}`
 
-      window.location.href =
-        `sms:${profile.emergency_phone}?body=${encodeURIComponent(msg)}`
-    })
+        console.log("SOS Message:", message)
+
+        // Opens SMS app
+        window.location.href =
+          `sms:${profile.emergency_phone}?body=${encodeURIComponent(message)}`
+      },
+      (error) => {
+        console.error("GPS Error:", error)
+        alert("Unable to get location")
+      }
+    )
   }
 
-  if (!profile) return <p>Loading...</p>
+  // ⏳ LOADING UI
+  if (loading) {
+    return (
+      <div className="text-center mt-20">
+        <h2 className="text-xl">Loading...</h2>
+      </div>
+    )
+  }
 
+  // ❌ NO PROFILE
+  if (!profile) {
+    return (
+      <div className="text-center mt-20">
+        <h2 className="text-red-500">No profile found</h2>
+      </div>
+    )
+  }
+
+  // ✅ MAIN UI
   return (
-    <div className="bg-slate-900 p-6 rounded-2xl w-[350px] text-center shadow-xl">
-      <h2 className="text-xl font-bold mb-4 text-blue-400">
+    <div className="bg-slate-900 p-6 rounded-2xl w-[350px] mx-auto mt-10 shadow-xl text-center">
+
+      <h2 className="text-2xl font-bold text-blue-400 mb-4">
         Dashboard
       </h2>
 
-      <p className="mb-1">Emergency Contact</p>
-      <p className="mb-4 text-gray-400">
-        {profile.emergency_name} ({profile.emergency_phone})
-      </p>
+      <div className="mb-4">
+        <p><strong>Name:</strong> {profile.name}</p>
+        <p><strong>Phone:</strong> {profile.phone}</p>
+        <p><strong>Age:</strong> {profile.age}</p>
+        <p><strong>Health:</strong> {profile.health}</p>
+      </div>
+
+      <div className="mb-6">
+        <p className="text-gray-400">Emergency Contact</p>
+        <p>{profile.emergency_name}</p>
+        <p>{profile.emergency_phone}</p>
+      </div>
 
       <button
         onClick={sendSOS}
@@ -58,6 +134,7 @@ https://maps.google.com/?q=${lat},${lon}`
       >
         🚨 SOS
       </button>
+
     </div>
   )
 }
